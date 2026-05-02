@@ -1,0 +1,76 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout (full history for getVersion.pl)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Toolchain identification
+        run: |
+          uname -a
+          $(command -v cc || echo cc) --version || true
+          gcc --version || true
+          make --version | head -1
+          perl -v | head -2
+
+      - name: Build all 18 host tools
+        run: make -C Linux
+
+      - name: Verify Linux/Install/ contents
+        run: |
+          set -e
+          missing=0
+          for t in cgen cpp cref dehuff dump enhuff hidump hidump2 \
+                   libr libr4 link mkpat objtohex optim p1 zas zas4 zc; do
+              if [ ! -x "Linux/Install/$t" ]; then
+                  echo "MISSING: $t"
+                  missing=$((missing + 1))
+              fi
+          done
+          [ "$missing" = 0 ] || { echo "$missing tools missing"; exit 1; }
+          echo "All 18 tools present."
+
+      - name: Version smoke test on a sample of tools
+        run: |
+          for t in zc cpp p1 cgen zas; do
+              echo "--- $t -V ---"
+              "./Linux/Install/$t" -V | head -5
+          done
+
+      - name: End-to-end smoke test (zc hello.c -> .com)
+        run: |
+          set -e
+          work=$(mktemp -d)
+          cat > "$work/hello.c" <<'EOF'
+          #include <stdio.h>
+          int main(void) { printf("hello, ci!\n"); return 0; }
+          EOF
+          PATH="$GITHUB_WORKSPACE/Linux/Install:$PATH" \
+            INCDIR80="$GITHUB_WORKSPACE/runtime/include80" \
+            LIBDIR80="$GITHUB_WORKSPACE/runtime/lib80" \
+            "$GITHUB_WORKSPACE/Linux/Install/zc" -o"$work/hello.com" "$work/hello.c"
+          test -f "$work/hello.com"
+          ls -la "$work/hello.com"
+          if ! grep -aq 'Compiled with Hi-Tech C' "$work/hello.com"; then
+              echo "HI-TECH signature missing from generated .com"
+              od -c "$work/hello.com" | head -10
+              exit 1
+          fi
+          echo "Signature found; .com size: $(wc -c < "$work/hello.com") bytes"
