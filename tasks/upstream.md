@@ -8,8 +8,16 @@ As of 2026-05-02, our `main` is **10 commits ahead** of `upstream/main` and
 
 ## Status
 
-Local branch **`upstream-prep`** is prepared — three clean commits on top of
-`upstream/main`, no `tasks/`/`runtime/`/`AGENTS.md`/`CLAUDE.md` content:
+PR submitted with explicit user authorisation on 2026-05-02:
+
+> **<https://github.com/ogdenpm/hitech/pull/5>** — open, awaiting maintainer review.
+> Title: "macOS portability: replace negative platform gates with #ifdef CPM"
+> 3 files changed, +47/-2.
+
+Branch `upstream-prep` is pushed to `origin` (ravn/hitech) and serves as the
+PR head. Tracking remains unset so a stray `git push` from the working tree
+cannot accidentally target upstream. Three clean commits on top of
+`upstream/main`:
 
 ```
 1e027ca cgen/nikitin: document LIBRARY.HUF transcription bugs
@@ -17,10 +25,9 @@ d606e97 cpp: replace defined(unix) || defined(_WIN32) guard with #ifndef CPM
 b386e50 enhuff: replace !unix && !_WIN32 guard with #if CPM
 ```
 
-Branch tracking is **deliberately unset** so a stray `git push` cannot
-target upstream. Full `make` in `Linux/` is clean on this branch on macOS
-Apple clang 21.0.0. The branch has not been pushed anywhere; submission
-is gated on explicit user authorisation.
+If the maintainer requests rebases or splits, do that on `upstream-prep` and
+push again. Other open items (runtime/ vendoring, AGENTS.md/CLAUDE.md,
+re-Huffman'ing LIBRARY.HUF) remain not-yet-discussed.
 
 ## Upstream-quality vs local-only
 
