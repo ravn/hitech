@@ -5,16 +5,6 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **Build a RunCPM Docker image and use it from the test job.**
-      Currently `.github/workflows/container.yml` -> `test` clones and
-      builds RunCPM from source on every run (~30s extra). A pre-built
-      image (e.g. `ghcr.io/ravn/runcpm:latest` from a separate repo, or
-      a sibling tag in `ghcr.io/ravn/hitech` like `:runcpm`) would let
-      the test job just `docker pull` it. Would also be useful as a
-      standalone CP/M emulator distribution. Not blocking — just an
-      optimisation when the rest of the pipeline matures. (User asked
-      to record this 2026-05-03.)
-
 - [ ] **(Maybe) Investigate Linux/glibc toolchain failure.** Two
       observable surfaces of what looks like one underlying bug in
       the decompiled tools (probably p1 producing wrong intermediate):
@@ -47,6 +37,18 @@ note next to each completed item describing how it was verified.
       <https://github.com/ogdenpm/hitech/commits/main> for new activity
       (last commit before our PR was June 2025), or consider opening a
       GitHub issue first to gauge interest.
+
+## Done — 2026-05-03
+
+- [x] **Built a RunCPM Docker image and switched the test job to use it.**
+      `runcpm/Dockerfile` builds MockbaTheBorg/RunCPM v6.9 + a
+      `runcpm-run` wrapper into a small ubuntu:24.04 image, published
+      to `ghcr.io/ravn/hitech:runcpm-latest` by the new
+      `.github/workflows/runcpm-image.yml` workflow on changes under
+      `runcpm/`. The `container.yml` test job now pulls this image
+      instead of cloning + building RunCPM from source on every CI
+      run. Also useful as a standalone CP/M-emulator distribution:
+      `docker run --rm -v "$PWD:/work" ghcr.io/ravn/hitech:runcpm-latest /work/foo.com`.
 
 ## Done — 2026-05-02
 
