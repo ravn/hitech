@@ -53,3 +53,71 @@ jobs:
           # Use GitHub Actions cache for faster rebuilds.
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  test:
+    # Pull the just-published image, compile a hello.c with it, and
+    # run the resulting .com under RunCPM to confirm end-to-end the
+    # toolchain inside the image is usable. As of 2026-05-02 this job
+    # FAILS on linux/arm64+glibc (cgen rejects p1's intermediate with
+    # 'Bad int. code'); see tasks/todo.md. Job will go green
+    # automatically once the underlying decompiled-tool bug is fixed.
+    needs: image
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Log in to GHCR (read)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image ref
+        id: ref
+        run: |
+          repo_lc=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          short=${GITHUB_SHA:0:7}
+          echo "image=ghcr.io/$repo_lc:sha-$short" >> "$GITHUB_OUTPUT"
+
+      - name: Pull image
+        run: docker pull ${{ steps.ref.outputs.image }}
+
+      - name: Compile hello.c via image
+        run: |
+          set -ex
+          mkdir -p test
+          cat > test/hello.c <<'EOF'
+          #include <stdio.h>
+          int main(void) { printf("hello, ci!\n"); return 0; }
+          EOF
+          docker run --rm -v "$PWD/test:/work" \
+              ${{ steps.ref.outputs.image }} zc hello.c
+          test -f test/hello.com
+          ls -la test/hello.com
+          grep -aq 'Compiled with Hi-Tech C' test/hello.com
+          echo "compile OK; .com size: $(wc -c < test/hello.com) bytes"
+
+      - name: Build RunCPM emulator
+        run: |
+          git clone --depth=1 https://github.com/MockbaTheBorg/RunCPM /tmp/RunCPM
+          cd /tmp/RunCPM/RunCPM
+          make -f Makefile.posix
+          ls -la RunCPM
+
+      - name: Run hello.com under RunCPM
+        run: |
+          set -e
+          mkdir -p /tmp/RunCPM/RunCPM/A/0
+          cp test/hello.com /tmp/RunCPM/RunCPM/A/0/HELLO.COM
+          cd /tmp/RunCPM/RunCPM
+          # SIGALRM after 10s in case RunCPM hangs.
+          out=$(printf 'HELLO\r\nEXIT\r\n' | perl -e 'alarm 10; exec @ARGV' ./RunCPM 2>&1 || true)
+          echo "--- RunCPM output ---"
+          printf '%s\n' "$out"
+          if ! printf '%s' "$out" | grep -q 'hello, ci!'; then
+              echo "FAIL: expected 'hello, ci!' in RunCPM output"
+              exit 1
+          fi
+          echo "RunCPM PASS"
