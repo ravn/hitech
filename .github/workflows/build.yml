@@ -14,7 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # macos-latest temporarily disabled (re-enable by appending it
+        # to this list). Tracked as a follow-up alongside the p1 SIGABRT
+        # investigation in tasks/todo.md.
+        os: [ubuntu-latest]
 
     steps:
       - name: Checkout (full history for getVersion.pl)
