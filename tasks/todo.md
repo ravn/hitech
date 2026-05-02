@@ -5,6 +5,16 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
+- [ ] **Build a RunCPM Docker image and use it from the test job.**
+      Currently `.github/workflows/container.yml` -> `test` clones and
+      builds RunCPM from source on every run (~30s extra). A pre-built
+      image (e.g. `ghcr.io/ravn/runcpm:latest` from a separate repo, or
+      a sibling tag in `ghcr.io/ravn/hitech` like `:runcpm`) would let
+      the test job just `docker pull` it. Would also be useful as a
+      standalone CP/M emulator distribution. Not blocking — just an
+      optimisation when the rest of the pipeline matures. (User asked
+      to record this 2026-05-03.)
+
 - [ ] **(Maybe) Investigate Linux/glibc toolchain failure.** Two
       observable surfaces of what looks like one underlying bug in
       the decompiled tools (probably p1 producing wrong intermediate):
