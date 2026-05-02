@@ -49,7 +49,7 @@ Run `Scripts/check.sh` from anywhere to verify the working tree is in shape: all
 
 ### Docker image (`ghcr.io/ravn/hitech:latest`)
 
-`Dockerfile` + `.github/workflows/container.yml` build a `linux/arm64` container with all 18 tools and the vendored runtime, published to GitHub Container Registry on every main push. **Status: the image-build mechanism works (tools run, `-V` reports versions correctly), but the toolchain inside currently can't compile real source — `cgen` rejects p1's intermediate output with `Bad int. code` on Linux/glibc.** Same root cause as the CI smoke-test SIGABRT and tracked alongside it in `tasks/todo.md`. Fixing the underlying p1 / decompiled-code bug would unbreak both at once.
+`Dockerfile` + `.github/workflows/container.yml` build a `linux/arm64` container with all 18 tools and the vendored runtime, published to GitHub Container Registry on every main push. End-to-end verified by the `test` job in the same workflow: the published image compiles a `hello.c` and runs the resulting `.com` under `ghcr.io/ravn/hitech:runcpm-latest`.
 
 ### Windows (Visual Studio)
 

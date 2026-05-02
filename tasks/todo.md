@@ -5,23 +5,6 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **(Maybe) Investigate Linux/glibc toolchain failure.** Two
-      observable surfaces of what looks like one underlying bug in
-      the decompiled tools (probably p1 producing wrong intermediate):
-        1. `p1: killed by signal 6` — was the failure on
-           `ubuntu-latest` (amd64 / glibc) and `macos-latest`
-           (arm64 / libsystem) when the CI smoke step ran them.
-        2. `cgen: bare.c:1: Bad int. code; cgen: exit 2` — what
-           `docker run ghcr.io/ravn/hitech:latest zc <anything>.c`
-           reports on `linux/arm64` (ubuntu:24.04 + glibc).
-      Doesn't reproduce on the maintainer's macOS arm64 + Apple clang.
-      Both surfaces would be fixed by the same root-cause work in p1
-      (~5 KLOC of decompiled C). Until then: the published Docker
-      image is useful for inspection (`-V`, `-K` dry runs) but cannot
-      compile real sources; CI's end-to-end smoke step has been
-      removed; `Scripts/check.sh` is the source of truth for
-      runtime correctness on the dev platform.
-
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
       change a contributed binary archive — escalate to `markogden/hitech`
@@ -39,6 +22,19 @@ note next to each completed item describing how it was verified.
       GitHub issue first to gauge interest.
 
 ## Done — 2026-05-03
+
+- [x] **Fixed the Linux/glibc cgen failure.** Root cause was
+      `cgen/cgen.c` `sub_1B2` storing `strcmp`'s result in a
+      `char cmp` local. On platforms where `char` defaults to
+      unsigned (gcc on Linux/arm64) the high bit was lost and the
+      `cmp < 0` branch never fired, so the binary-search token
+      lookup always returned -1. Every `[s` / `[u` (struct/union)
+      directive in the intermediate code hit `parseStmt`'s default
+      case and aborted with "Bad int. code". Same root cause as the
+      earlier `p1: killed by signal 6` symptom. Fix: declare `cmp`
+      as `int`. Verified by reproducing with a 3-line `.p1` then
+      seeing the test job in `.github/workflows/container.yml` go
+      green for the first time end-to-end.
 
 - [x] **Built a RunCPM Docker image and switched the test job to use it.**
       `runcpm/Dockerfile` builds MockbaTheBorg/RunCPM v6.9 + a
