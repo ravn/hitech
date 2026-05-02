@@ -5,29 +5,12 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **Verify `cpp.c` `#ifndef CPM` change preserves CP/M cross-build.**
-      Companion to task #5 (enhuff). The line-1895 fix is functionally
-      identical to the original on Linux + Windows (where `unix` /
-      `_WIN32` was defined), and now also runs on macOS. CP/M cross-build
-      path (which sets `-DCPM`) needs explicit verification — same
-      caveat as enhuff: `cpp/cpm/` Makefile not present in repo.
-
-
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
       change a contributed binary archive — escalate to `markogden/hitech`
       rather than carrying the rewrite in this fork. Verify
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
-
-- [ ] **Verify the `enhuff` `#ifdef CPM` change preserves CP/M cross-build.**
-      The fix is functionally equivalent on the modern host (neither side
-      executes), but the CP/M cross-build path (zxcc-based) needs
-      verification. The new test must be true on CP/M; `zc.c`'s targets
-      table sets `-DCPM`, suggesting the macro is defined during
-      cross-builds, but no `enhuff/cpm/` Makefile exists to confirm.
-      Either inspect the cross-build flag set, or add an `enhuff/cpm/`
-      Makefile and run under `zxcc`.
 
 - [ ] **Decide upstream contribution path.** Remote is
       `git@github.com:ravn/hitech.git` (personal fork). The `enhuff` fix
