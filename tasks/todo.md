@@ -20,11 +20,6 @@ note next to each completed item describing how it was verified.
       with attribution and licence note. Decide vendoring vs. fetch-at-build.
       Result: fresh clone → `make && make runtime` → working `zc hello.c`.
 
-- [ ] **Verify `hello.com` actually executes under a CP/M emulator.**
-      Currently the toolchain's correctness is verified by binary inspection
-      only. Install one of `zxcc` / `tnylpo` / `runcpm` (not in Homebrew —
-      build from source) and confirm a built `.com` actually runs and
-      prints. Document the chosen emulator in `AGENTS.md`.
 
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
@@ -52,6 +47,15 @@ note next to each completed item describing how it was verified.
       project — upstream may not want that file at all.
 
 ## Done — 2026-05-02
+
+- [x] **Verified `hello.com` runs under a CP/M emulator.** RunCPM v6.7
+      (already built at `/Users/ravn/git/RunCPM/`, not in this repo)
+      loads `HELLO.COM` from `RunCPM/RunCPM/A/0/`, executes the
+      macOS-built 8460-byte binary, and prints `hello, z80!` followed by
+      a clean return to the `A0>` prompt. End-to-end pipeline
+      (cpp → p1 → cgen → optim → zas → link → objtohex on macOS,
+      linked against `agn453/dist/LIBC.LIB`) confirmed working at
+      runtime, not just by inspection.
 
 - [x] **Documented `LIBRARY.HUF` transcription bugs in
       `cgen/nikitin/KNOWN_BUGS.md`.** `sprintf.asm:21`
