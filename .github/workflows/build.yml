@@ -55,32 +55,29 @@ jobs:
           done
 
       - name: End-to-end smoke test (zc hello.c -> .com)
-        # Informational. Currently fails in CI on both Ubuntu (stack
-        # canary trips somewhere in the cgen/optim/zas chain) and
-        # macos-latest (mystery 'hello.obj: Can't open' that doesn't
-        # reproduce on the maintainer's local macOS). The same test
-        # passes locally and via Scripts/check.sh. Leaving the step in
-        # so regressions in the macOS host build are still observed;
-        # continue-on-error keeps CI green until the underlying tool
-        # bug is investigated and fixed.
         continue-on-error: true
         run: |
-          set -e
+          set -ex
           work=$(mktemp -d)
           cat > "$work/hello.c" <<'EOF'
           #include <stdio.h>
           int main(void) { printf("hello, ci!\n"); return 0; }
           EOF
           cd "$work"
-          PATH="$GITHUB_WORKSPACE/Linux/Install:$PATH" \
-            INCDIR80="$GITHUB_WORKSPACE/runtime/include80" \
-            LIBDIR80="$GITHUB_WORKSPACE/runtime/lib80" \
-            zc hello.c
+          export PATH="$GITHUB_WORKSPACE/Linux/Install:$PATH"
+          export INCDIR80="$GITHUB_WORKSPACE/runtime/include80"
+          export LIBDIR80="$GITHUB_WORKSPACE/runtime/lib80"
+          # -V makes zc echo every sub-tool invocation; if the chain
+          # crashes we see exactly which step it's on.
+          zc -V hello.c || rc=$?
+          echo "--- zc exit code: ${rc:-0} ---"
+          echo "--- workdir contents after zc ---"
           ls -la
-          test -f hello.com
-          if ! grep -aq 'Compiled with Hi-Tech C' hello.com; then
-              echo "HI-TECH signature missing from generated .com"
-              od -c hello.com | head -10
+          echo "--- /tmp tail ---"
+          ls -la /tmp/_*_.* 2>/dev/null || echo "(no zc tmp files left)"
+          if [ ! -f hello.com ] || ! grep -aq 'Compiled with Hi-Tech C' hello.com; then
+              echo "FAIL: no usable hello.com produced"
+              [ -f hello.com ] && od -c hello.com | head -5
               exit 1
           fi
           echo "Signature found; .com size: $(wc -c < hello.com) bytes"
