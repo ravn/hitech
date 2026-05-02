@@ -14,6 +14,13 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  # Opt in to Node 24 now so the runner doesn't print a Node-20
+  # deprecation warning for actions/checkout@v4, docker/*-action@v3,
+  # etc. Node 24 becomes the default after 2026-06-02 — at that
+  # point this env can be removed.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   image:
     runs-on: ubuntu-24.04-arm
