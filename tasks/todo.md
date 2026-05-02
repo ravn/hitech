@@ -40,6 +40,29 @@ note next to each completed item describing how it was verified.
 
 ## Done — 2026-05-02
 
+- [x] **Verified `enhuff` and `cpp.c:1895` fixes do not affect any
+      CP/M cross-build path.** Inspection-based, no `zxcc` needed:
+
+      1. Neither `enhuff/` nor `cpp/` has a `cpm/` or `native/`
+         subdirectory — only `cgen`, `link`, `p1`, `libr4`, `zas` carry
+         in-tree CP/M cross-build paths. So there is no cross-build of
+         these specific tools' own source to break.
+      2. For users' source code being *cross-compiled* via `zc`, the
+         CPM target table (`zc/zc.c:78-87`) always sets `-DCPM` (and
+         `-DCPMEX` on full-CPM targets). The original negative tests
+         and the new positive tests both correctly identify CP/M:
+
+         | Old test                                    | CPM (`-DCPM`) | macOS (Apple clang) | Linux (gcc) |
+         | ------------------------------------------- | ------------- | ------------------- | ----------- |
+         | `#if !defined(unix) && !defined(_WIN32)`    | true          | true (BUG)          | false       |
+         | `#if defined(unix) \|\| defined(_WIN32)`    | false         | false (BUG)         | true        |
+         | `#if CPM` / `#ifndef CPM` (after fix)       | true / false  | false / true        | false / true |
+
+         The fixes are no-ops on CP/M and on Linux; they correct only
+         the macOS column. So the CP/M cross-build path is unaffected
+         in principle even if a `cpp/cpm/` or `enhuff/cpm/` Makefile
+         were added later.
+
 - [x] **Vendored the Z80 target runtime under `runtime/`.** 22
       standard headers (`runtime/include80/`), runtime libraries +
       startup objects (`runtime/lib80/`), the HI-TECH freeware license
