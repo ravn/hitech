@@ -55,6 +55,10 @@ jobs:
           done
 
       - name: End-to-end smoke test (zc hello.c -> .com)
+        # cd into the work dir so zc's intermediate .obj/.p1 files
+        # and the final .com all land relative to the same place;
+        # zc passes basenames between its sub-tools so absolute paths
+        # break the link step.
         run: |
           set -e
           work=$(mktemp -d)
@@ -62,15 +66,16 @@ jobs:
           #include <stdio.h>
           int main(void) { printf("hello, ci!\n"); return 0; }
           EOF
+          cd "$work"
           PATH="$GITHUB_WORKSPACE/Linux/Install:$PATH" \
             INCDIR80="$GITHUB_WORKSPACE/runtime/include80" \
             LIBDIR80="$GITHUB_WORKSPACE/runtime/lib80" \
-            "$GITHUB_WORKSPACE/Linux/Install/zc" -o"$work/hello.com" "$work/hello.c"
-          test -f "$work/hello.com"
-          ls -la "$work/hello.com"
-          if ! grep -aq 'Compiled with Hi-Tech C' "$work/hello.com"; then
+            zc hello.c
+          test -f hello.com
+          ls -la hello.com
+          if ! grep -aq 'Compiled with Hi-Tech C' hello.com; then
               echo "HI-TECH signature missing from generated .com"
-              od -c "$work/hello.com" | head -10
+              od -c hello.com | head -10
               exit 1
           fi
-          echo "Signature found; .com size: $(wc -c < "$work/hello.com") bytes"
+          echo "Signature found; .com size: $(wc -c < hello.com) bytes"
