@@ -3,8 +3,24 @@
 Upstream is **`ogdenpm/hitech`** (Mark Ogden, GitHub user `ogdenpm`):
 <https://github.com/ogdenpm/hitech>. The local `upstream` remote is configured.
 
-As of 2026-05-02, our `main` is **9 commits ahead** of `upstream/main` and
+As of 2026-05-02, our `main` is **10 commits ahead** of `upstream/main` and
 **0 behind**. Last upstream commit is `505c288` (zas4 fix, June 2025).
+
+## Status
+
+Local branch **`upstream-prep`** is prepared — three clean commits on top of
+`upstream/main`, no `tasks/`/`runtime/`/`AGENTS.md`/`CLAUDE.md` content:
+
+```
+1e027ca cgen/nikitin: document LIBRARY.HUF transcription bugs
+d606e97 cpp: replace defined(unix) || defined(_WIN32) guard with #ifndef CPM
+b386e50 enhuff: replace !unix && !_WIN32 guard with #if CPM
+```
+
+Branch tracking is **deliberately unset** so a stray `git push` cannot
+target upstream. Full `make` in `Linux/` is clean on this branch on macOS
+Apple clang 21.0.0. The branch has not been pushed anywhere; submission
+is gated on explicit user authorisation.
 
 ## Upstream-quality vs local-only
 
