@@ -1,13 +1,11 @@
 name: Build
 
-# Build-portability check only. The maintainer develops on macOS arm64
-# (Apple clang); ubuntu-latest on amd64 with glibc is a different
-# platform along three axes (ISA, libc, OS), so runtime smoke testing
-# in CI doesn't validate the maintainer's actual environment. Build
-# success here still catches case-sensitive include bugs, missing
-# headers, and gcc-vs-clang portability regressions, which is the
-# useful signal. End-to-end runtime verification stays in
-# Scripts/check.sh and is run locally on macOS.
+# Build-portability check on arm64 Linux. The maintainer develops on
+# macOS arm64 (Apple clang); ubuntu-24.04-arm shares the ISA but
+# differs in libc (glibc vs Apple libsystem) and OS, which still
+# catches case-sensitive include bugs, missing headers, and
+# gcc-vs-clang portability regressions. End-to-end runtime
+# verification stays in Scripts/check.sh, run locally on macOS.
 
 on:
   push:
@@ -23,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04-arm]
 
     steps:
       - name: Checkout (full history for getVersion.pl)
