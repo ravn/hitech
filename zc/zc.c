@@ -581,7 +581,15 @@ static bool doexec(char *name, char **vec) {
         perror("Fork failed");
     if (wait(&status) != pid)
         perror("Wait failed");
-    return status == 0;
+    if (status != 0) {
+        if (WIFSIGNALED(status))
+            fprintf(stderr, "%s: killed by signal %d\n", args[0], WTERMSIG(status));
+        else if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+            fprintf(stderr, "%s: exit %d\n", args[0], WEXITSTATUS(status));
+        nerrs++;
+        return false;
+    }
+    return true;
 #endif
 }
 
