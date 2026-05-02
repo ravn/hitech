@@ -47,6 +47,10 @@ make install      # copy to Linux/Install/ (also done by `all`)
 
 Run `Scripts/check.sh` from anywhere to verify the working tree is in shape: all 18 host tools built, runtime/ tree intact, end-to-end `zc hello.c` produces a runnable `.com`, RunCPM executes it (if the emulator is available), git position vs `origin`/`upstream/main` reasonable, and `ogdenpm/hitech#5` PR status. Designed for a quick "am I good to start?" check when sitting back down at the project. Exits non-zero on any failure.
 
+### Docker image (`ghcr.io/ravn/hitech:latest`)
+
+`Dockerfile` + `.github/workflows/container.yml` build a `linux/arm64` container with all 18 tools and the vendored runtime, published to GitHub Container Registry on every main push. **Status: the image-build mechanism works (tools run, `-V` reports versions correctly), but the toolchain inside currently can't compile real source — `cgen` rejects p1's intermediate output with `Bad int. code` on Linux/glibc.** Same root cause as the CI smoke-test SIGABRT and tracked alongside it in `tasks/todo.md`. Fixing the underlying p1 / decompiled-code bug would unbreak both at once.
+
 ### Windows (Visual Studio)
 
 Open `hitech.sln` in Visual Studio 2022 and build. `hishared/Cbuild.props` and `hishared/Version.props` are shared props; `hishared/hishared.vcxitems` is the shared-source items project referenced by every tool.

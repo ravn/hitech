@@ -5,17 +5,22 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **(Maybe) Investigate `p1: killed by signal 6` in CI.** Was
-      observed when CI ran the end-to-end smoke step on
-      `ubuntu-latest` (amd64 / glibc) and `macos-latest` (arm64 /
-      libsystem), but ubuntu-amd64 is incompatible with the
-      maintainer's macos-arm64-cc development platform along three
-      axes (ISA, libc, OS), so a SIGABRT there is not necessarily
-      the same bug that would occur on macOS. The end-to-end smoke
-      test was removed from CI for this reason; runtime verification
-      lives in `Scripts/check.sh` instead, which the maintainer runs
-      on the actual development platform where it passes. Re-open
-      this task only if the smoke test starts failing locally too.
+- [ ] **(Maybe) Investigate Linux/glibc toolchain failure.** Two
+      observable surfaces of what looks like one underlying bug in
+      the decompiled tools (probably p1 producing wrong intermediate):
+        1. `p1: killed by signal 6` — was the failure on
+           `ubuntu-latest` (amd64 / glibc) and `macos-latest`
+           (arm64 / libsystem) when the CI smoke step ran them.
+        2. `cgen: bare.c:1: Bad int. code; cgen: exit 2` — what
+           `docker run ghcr.io/ravn/hitech:latest zc <anything>.c`
+           reports on `linux/arm64` (ubuntu:24.04 + glibc).
+      Doesn't reproduce on the maintainer's macOS arm64 + Apple clang.
+      Both surfaces would be fixed by the same root-cause work in p1
+      (~5 KLOC of decompiled C). Until then: the published Docker
+      image is useful for inspection (`-V`, `-K` dry runs) but cannot
+      compile real sources; CI's end-to-end smoke step has been
+      removed; `Scripts/check.sh` is the source of truth for
+      runtime correctness on the dev platform.
 
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
