@@ -1,0 +1,36 @@
+#!/bin/sh
+# runcpm-run <path-to-com-file>
+#
+# Thin wrapper around RunCPM. Copies the supplied .com file onto
+# drive A:, runs it via the internal CCP, and exits when the
+# program finishes.
+#
+# A 10-second alarm watchdog (perl) prevents the container from
+# hanging forever if the program loops or RunCPM gets confused.
+
+set -e
+
+com=$1
+if [ -z "$com" ] || [ ! -f "$com" ]; then
+    echo "usage: runcpm-run <path-to-com-file>" >&2
+    echo "(received: '$com')" >&2
+    exit 64
+fi
+
+# CP/M filenames are uppercase, max 8 chars before the extension.
+base=$(basename "$com" .com | tr '[:lower:]' '[:upper:]')
+base=$(basename "$base" .COM)
+if [ -z "$base" ]; then
+    echo "runcpm-run: empty basename for $com" >&2
+    exit 65
+fi
+
+cp "$com" "/opt/runcpm/A/0/$base.COM"
+
+cd /opt/runcpm
+# RunCPM doesn't exit on stdin EOF and we don't bake EXIT.COM
+# into the disk, so the alarm watchdog is what stops the process.
+# That makes the exit code SIGALRM (142) on every successful run;
+# swallow it so callers see exit 0 and rely on output inspection
+# to determine success/failure.
+printf '%s\r\n' "$base" | perl -e 'alarm 10; exec @ARGV' ./RunCPM 2>&1 || true

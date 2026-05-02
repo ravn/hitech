@@ -1,0 +1,56 @@
+name: RunCPM Container
+
+# Builds a Docker image of the RunCPM CP/M emulator and publishes
+# it to GHCR as ghcr.io/<repo>:runcpm-latest plus an immutable
+# :runcpm-sha-<short> tag per commit. Used by the test job in
+# container.yml to verify hitech-built .com files actually run,
+# without rebuilding RunCPM from source on every CI invocation.
+#
+# Triggered only when the runcpm/ subtree or this workflow file
+# changes — there's no point rebuilding RunCPM when only HI-TECH
+# tooling moves.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'runcpm/**'
+      - '.github/workflows/runcpm-image.yml'
+  workflow_dispatch:
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: tags
+        run: |
+          repo_lc=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          short=${GITHUB_SHA:0:7}
+          echo "tags=ghcr.io/$repo_lc:runcpm-latest,ghcr.io/$repo_lc:runcpm-sha-$short" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push (linux/arm64)
+        uses: docker/build-push-action@v7
+        with:
+          context: runcpm
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=runcpm
+          cache-to: type=gha,mode=max,scope=runcpm
