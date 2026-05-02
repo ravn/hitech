@@ -12,14 +12,14 @@ note next to each completed item describing how it was verified.
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
 
-- [ ] **Decide upstream contribution path.** Remote is
-      `git@github.com:ravn/hitech.git` (personal fork). The `enhuff` fix
-      and the `AGENTS.md` / `CLAUDE.md` improvements are upstream-quality
-      for `markogden/hitech` (or wherever the canonical fork lives). Confirm
-      upstream URL, decide whether to open a PR, split into commits the
-      maintainer will accept (likely separate the C fix from the docs
-      rewrite). Note: original `AGENTS.md` was copied from a different
-      project — upstream may not want that file at all.
+- [ ] **Open the upstream PR(s) when ready.** Upstream confirmed as
+      `ogdenpm/hitech` (Mark Ogden). Local `upstream` remote configured;
+      we're 9 commits ahead, 0 behind `upstream/main`. Detailed PR plan
+      in `tasks/upstream.md`: one PR for the two macOS C fixes
+      (enhuff + cpp.c:1895), one PR for KNOWN_BUGS.md, runtime/ and
+      AGENTS.md/CLAUDE.md require maintainer input first. Cherry-pick
+      recipe documented; `gh pr create` step is a shared-state action,
+      requires explicit user authorisation.
 
 ## Done — 2026-05-02
 
