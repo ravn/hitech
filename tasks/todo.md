@@ -26,14 +26,12 @@ note next to each completed item describing how it was verified.
       build from source) and confirm a built `.com` actually runs and
       prints. Document the chosen emulator in `AGENTS.md`.
 
-- [ ] **Fix decompilation bugs in `cgen/nikitin/LIBRARY.HUF`.**
-      `sprintf.asm:21` — `ld (_spf+2),h` is invalid Z80; right-column
-      comment shows the C-compiled output was `ld (_spf+2),hl`.
-      `pnum.asm:56` — undefined symbol `__pnum`. Decide whether to fix
-      in-place (would require re-Huffman'ing via `enhuff`) or document as a
-      known artefact. Both files are stdio-related; the prebuilt
-      `LIBC.LIB` from `agn453/dist/` provides working substitutes, so
-      this is not blocking.
+- [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
+      Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
+      change a contributed binary archive — escalate to `markogden/hitech`
+      rather than carrying the rewrite in this fork. Verify
+      `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
+      identically before any such change.
 
 - [ ] **Verify the `enhuff` `#ifdef CPM` change preserves CP/M cross-build.**
       The fix is functionally equivalent on the modern host (neither side
@@ -54,6 +52,14 @@ note next to each completed item describing how it was verified.
       project — upstream may not want that file at all.
 
 ## Done — 2026-05-02
+
+- [x] **Documented `LIBRARY.HUF` transcription bugs in
+      `cgen/nikitin/KNOWN_BUGS.md`.** `sprintf.asm:21`
+      (`ld (_spf+2),h` → `ld (_spf+2),hl`) and `pnum.asm:56`
+      (`call __pnum` → `call _pnum`). Both confirmed by reading the
+      extracted files; right-column comments preserve the original
+      correct mnemonics. Archive itself left untouched as a verbatim
+      record of Nikitin's contribution.
 
 - [x] **`cpp/cpp.c:1895` macOS portability fix.** Replaced
       `#if defined(unix) || defined(_WIN32)` with `#ifndef CPM`. Full
