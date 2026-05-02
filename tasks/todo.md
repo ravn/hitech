@@ -5,14 +5,12 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **Apply `cpp/cpp.c:1895` macOS portability fix.** Same negative
-      `#if defined(unix) || defined(_WIN32)` pattern enhuff used. Skipped on
-      Apple clang, leaves `dirs[0] = dirnams[0] = "."` uninitialised. `dirs[]` is
-      `STATIC` so the slot reads as NULL; the include-search loop at
-      `cpp.c:998` (`for (dirp = dirs + inctype; *dirp; ++dirp)`) terminates
-      immediately when no `-I.` is passed. Suspected but not yet reproduced.
-      Plan: invert to `#ifndef CPM`, then craft a `#include "local.h"` test
-      that fails on the unfixed binary and passes on the fixed one.
+- [ ] **Verify `cpp.c` `#ifndef CPM` change preserves CP/M cross-build.**
+      Companion to task #5 (enhuff). The line-1895 fix is functionally
+      identical to the original on Linux + Windows (where `unix` /
+      `_WIN32` was defined), and now also runs on macOS. CP/M cross-build
+      path (which sets `-DCPM`) needs explicit verification — same
+      caveat as enhuff: `cpp/cpm/` Makefile not present in repo.
 
 - [ ] **Add reproducible runtime tree.** Turn the throwaway
       `/tmp/hitech-test/` setup into a permanent `Linux/runtime/` (or
@@ -56,6 +54,25 @@ note next to each completed item describing how it was verified.
       project — upstream may not want that file at all.
 
 ## Done — 2026-05-02
+
+- [x] **`cpp/cpp.c:1895` macOS portability fix.** Replaced
+      `#if defined(unix) || defined(_WIN32)` with `#ifndef CPM`. Full
+      `Linux/` build clean after change.
+      **Surprise finding:** the bug is *latent*, not observable. Initial
+      analysis assumed the missing `dirs[0] = dirnams[0] = "."` init
+      would break `#include` resolution. In practice it does not, because
+      line 1985 (`dirs[0] = dirnams[ifno] = trmdir(argv[i])`) overwrites
+      `dirs[0]` whenever a source filename is provided (including the
+      synthetic argv produced by `_getargs` at line 1856 when `argc==1`).
+      The original reproducer (`cpp < driver.c` containing
+      `#include "local.h"`) failed for an unrelated reason: `_getargs`
+      tokenises stdin into argv on the no-args path, treating `#include`
+      and `"local.h"` as flags. Apple-clang skipping line 1895 has no
+      observable effect on any code path I can construct. The fix is
+      still correct as code hygiene — matches the project's positive
+      `CPM` convention and removes the surprising negative test that
+      Apple clang silently mishandles. Documented latency in the commit
+      message.
 
 - [x] **`enhuff/enhuff.c` macOS portability fix.** Replaced
       `#if !defined(unix) && !defined(_WIN32)` with `#if CPM`. Verified by
