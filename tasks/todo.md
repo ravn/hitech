@@ -12,14 +12,14 @@ note next to each completed item describing how it was verified.
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
 
-- [ ] **Open the upstream PR(s) when ready.** Upstream confirmed as
-      `ogdenpm/hitech` (Mark Ogden). Local `upstream` remote configured;
-      we're 9 commits ahead, 0 behind `upstream/main`. Detailed PR plan
-      in `tasks/upstream.md`: one PR for the two macOS C fixes
-      (enhuff + cpp.c:1895), one PR for KNOWN_BUGS.md, runtime/ and
-      AGENTS.md/CLAUDE.md require maintainer input first. Cherry-pick
-      recipe documented; `gh pr create` step is a shared-state action,
-      requires explicit user authorisation.
+- [ ] **Track ogdenpm/hitech#5 review.** Three-commit PR
+      (enhuff + cpp.c:1895 + KNOWN_BUGS.md) opened 2026-05-02 with
+      explicit user authorisation. Watch for maintainer response;
+      rebase / split / re-message as requested. If merged, drop this
+      entry and close the loop in `tasks/upstream.md`. Other potential
+      upstream items (`runtime/` vendoring, AGENTS.md/CLAUDE.md,
+      re-Huffman'ing LIBRARY.HUF) were deliberately held back from
+      PR #5 — discuss with the maintainer separately if interest is shown.
 
 ## Done — 2026-05-02
 
