@@ -43,6 +43,10 @@ make install      # copy to Linux/Install/ (also done by `all`)
 
 `Linux/hi.mk` is the common include used by every per-tool Makefile. Default flags: `gcc -O3 -Wall -I<srcdir> -I<root>/hishared`. The build copies the resulting binary into `Linux/Install/` automatically.
 
+### Health check
+
+Run `Scripts/check.sh` from anywhere to verify the working tree is in shape: all 18 host tools built, runtime/ tree intact, end-to-end `zc hello.c` produces a runnable `.com`, RunCPM executes it (if the emulator is available), git position vs `origin`/`upstream/main` reasonable, and `ogdenpm/hitech#5` PR status. Designed for a quick "am I good to start?" check when sitting back down at the project. Exits non-zero on any failure.
+
 ### Windows (Visual Studio)
 
 Open `hitech.sln` in Visual Studio 2022 and build. `hishared/Cbuild.props` and `hishared/Version.props` are shared props; `hishared/hishared.vcxitems` is the shared-source items project referenced by every tool.

@@ -72,6 +72,19 @@ make -C Linux/<tool> rebuild
 
 If `-V` shows `+` after the version, you have uncommitted changes. If it shows `?`, git was unavailable during build.
 
+### Health check (`Scripts/check.sh`)
+
+A repository-wide smoke test for "am I good to start?" sessions. Run it from anywhere; it cd's into the repo root and runs:
+
+1. **Host build** — checks every name in the 18-tool list has a binary in `Linux/Install/`.
+2. **Runtime tree** — counts `*.H` files in `runtime/include80/` (expects 22) and `*.LIB`/`*.OBJ` in `runtime/lib80/` (expects 7).
+3. **Smoke test** — compiles a tiny `hello.c` with the local `zc` against the runtime tree and confirms the resulting `.com` carries the HI-TECH signature.
+4. **RunCPM** — if `/Users/ravn/git/RunCPM/RunCPM/RunCPM` exists (override with `RUNCPM_DIR`), actually executes the `.com` and checks the printed line.
+5. **Git state** — branch, ahead/behind `origin` and `upstream/main`, dirty working tree, local-only branches with no upstream tracking.
+6. **PR #5** — if `gh` is installed and authenticated, prints the merged/open state of `ogdenpm/hitech#5` and the comment count.
+
+Each step prints PASS / FAIL / SKIP. Exits non-zero on any FAIL. Designed to be run when you sit back down at the project, not on every commit.
+
 ## Versioning
 
 `Scripts/getVersion.pl` reads git history for the tool's directory and writes `_version.h` containing `#define GIT_VERSION "yyyy.mm.dd.nn"`. Invoked from `Linux/hi.mk`:
