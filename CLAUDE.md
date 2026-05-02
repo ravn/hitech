@@ -23,6 +23,8 @@ Each tool lives in its own top-level directory with the same internal shape:
 
 Tools: `cgen`, `cpp`, `cref`, `dehuff`, `dump`, `enhuff`, `hidump`, `hidump2`, `libr`, `libr4`, `link`, `mkpat`, `objtohex`, `optim`, `p1`, `zas`, `zas4`, `zc`. Shared code is in `hishared/`.
 
+`runtime/` (top-level) holds the **Z80 target runtime** — 22 standard headers in `runtime/include80/`, plus runtime libraries (`LIBC.LIB`, `LIBF.LIB`, `LIBOVR.LIB`) and startup objects (`CRTCPM.OBJ`, `NRTCPM.OBJ`, `RRTCPM.OBJ`, `DRTCPM.OBJ`) in `runtime/lib80/`. These come from Tony Nicholson's `agn453/HI-TECH-Z80-C` consolidated distribution; provenance, license, and refresh procedure live in `runtime/README.md`. Source `runtime/env.sh` from the repo root to set `PATH` + `INCDIR80` + `LIBDIR80` and use `zc` end-to-end.
+
 ## Build commands
 
 ### Linux / WSL (gcc)

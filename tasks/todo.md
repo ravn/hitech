@@ -12,14 +12,6 @@ note next to each completed item describing how it was verified.
       path (which sets `-DCPM`) needs explicit verification — same
       caveat as enhuff: `cpp/cpm/` Makefile not present in repo.
 
-- [ ] **Add reproducible runtime tree.** Turn the throwaway
-      `/tmp/hitech-test/` setup into a permanent `Linux/runtime/` (or
-      top-level `dist/`) Makefile target. Vendor or fetch the
-      `agn453/HI-TECH-Z80-C` `dist/` files (headers + LIBC.LIB + LIBF.LIB +
-      crt obj variants) into a known location alongside `Linux/Install/`,
-      with attribution and licence note. Decide vendoring vs. fetch-at-build.
-      Result: fresh clone → `make && make runtime` → working `zc hello.c`.
-
 
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
@@ -47,6 +39,17 @@ note next to each completed item describing how it was verified.
       project — upstream may not want that file at all.
 
 ## Done — 2026-05-02
+
+- [x] **Vendored the Z80 target runtime under `runtime/`.** 22
+      standard headers (`runtime/include80/`), runtime libraries +
+      startup objects (`runtime/lib80/`), the HI-TECH freeware license
+      (`runtime/LICENSE.HITECH`), a sourceable env helper
+      (`runtime/env.sh`) and a provenance/usage README
+      (`runtime/README.md`). Files come from Tony Nicholson's
+      `agn453/HI-TECH-Z80-C` `dist/` snapshot of 2026-05-02. End-to-end
+      verified: `source runtime/env.sh && zc hi.c` produces a working
+      `hi.com` that runs under RunCPM. CLAUDE.md and AGENTS.md updated
+      to point at it.
 
 - [x] **Verified `hello.com` runs under a CP/M emulator.** RunCPM v6.7
       (already built at `/Users/ravn/git/RunCPM/`, not in this repo)

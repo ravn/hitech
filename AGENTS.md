@@ -35,6 +35,8 @@ Each tool lives in its own top-level directory with the same shape:
 
 Shared code lives in `hishared/` (`showVersion.h`, `_version.c`, `appinfo.h`, `Cbuild.props`, `Version.props`).
 
+The **Z80 target runtime** is vendored in `runtime/` at the repo root (headers in `include80/`, libraries and startup objects in `lib80/`). It is sourced from Tony Nicholson's `agn453/HI-TECH-Z80-C` consolidated distribution; see `runtime/README.md` for provenance and refresh instructions, and `runtime/LICENSE.HITECH` for the freeware grant. `source runtime/env.sh` from the repo root to point a host-built `zc` at the headers, libraries, and the locally built host tools.
+
 ## Build workflows
 
 ### Linux / macOS (gcc / Apple clang)
