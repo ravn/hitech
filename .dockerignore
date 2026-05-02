@@ -11,6 +11,11 @@ tasks/
 *.swp
 .DS_Store
 
+# Host-built object files would otherwise satisfy `make`'s mtime check
+# inside the container, leaving the linker to load Mach-O bytes through
+# Linux gcc. Always rebuild from .c inside the container.
+**/*.o
+
 # Per-tool host build outputs (the ones that aren't already covered
 # by the repo-root .gitignore patterns)
 Linux/*/cgen
