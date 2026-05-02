@@ -1,0 +1,33 @@
+# Local build artefacts — Linux/Install/ is regenerated inside the
+# container, and .vs / .vscode are local IDE state.
+Linux/Install/
+**/.vs/
+**/.vscode/
+**/.idea/
+.claude/
+
+# Don't leak temp files or local-only working state into the image
+tasks/
+*.swp
+.DS_Store
+
+# Per-tool host build outputs (the ones that aren't already covered
+# by the repo-root .gitignore patterns)
+Linux/*/cgen
+Linux/*/cpp
+Linux/*/cref
+Linux/*/dehuff
+Linux/*/dump
+Linux/*/enhuff
+Linux/*/hidump
+Linux/*/hidump2
+Linux/*/libr
+Linux/*/libr4
+Linux/*/link
+Linux/*/mkpat
+Linux/*/objtohex
+Linux/*/optim
+Linux/*/p1
+Linux/*/zas
+Linux/*/zas4
+Linux/*/zc
