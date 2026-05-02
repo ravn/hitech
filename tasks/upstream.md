@@ -9,17 +9,20 @@ As of 2026-05-02, our `main` is **10 commits ahead** of `upstream/main` and
 ## Status
 
 PR was opened 2026-05-02, then **closed by us later the same day** with no
-maintainer response (no comments, no review). The branch `upstream-prep`
-remains on `origin` and locally with the three clean commits intact, ready
-to re-submit when there's evidence the maintainer is actively merging:
+maintainer response. The `upstream-prep` branch was deleted from both
+`origin` and the local repo. The PR record at
+<https://github.com/ogdenpm/hitech/pull/5> shows as CLOSED with the head
+branch deleted; only the commit metadata remains.
+
+To re-create the prep branch when needed, the underlying changes are
+preserved in `main`'s history. Use the recipe in the "Mechanical plan"
+section below — substitute these commit IDs for the ones cherry-picked:
 
 ```
-1e027ca cgen/nikitin: document LIBRARY.HUF transcription bugs
-d606e97 cpp: replace defined(unix) || defined(_WIN32) guard with #ifndef CPM
-b386e50 enhuff: replace !unix && !_WIN32 guard with #if CPM
+2c75272 / earlier: enhuff/enhuff.c #if CPM     (originally 808eb09)
+749bc9a:           cpp/cpp.c #ifndef CPM
+1b46df9:           cgen/nikitin/KNOWN_BUGS.md
 ```
-
-Reference: closed PR at <https://github.com/ogdenpm/hitech/pull/5>.
 
 Other host-tool fixes that landed in `main` after PR #5 was opened and
 were never submitted upstream (would belong in a hypothetical PR #6 if we

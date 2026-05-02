@@ -25,13 +25,13 @@ note next to each completed item describing how it was verified.
       identically before any such change.
 
 - [ ] **(Dormant) Re-engage upstream when there's a signal Mark is active.**
-      PR #5 (closed 2026-05-02 after no response) and the additional
-      host-tool fixes that landed since are documented in
-      `tasks/upstream.md`. Branch `upstream-prep` is preserved with the
-      original 3 clean commits, ready to re-submit. Rather than another
-      cold-open PR, watch <https://github.com/ogdenpm/hitech/commits/main>
-      for new activity (last commit before our PR was June 2025), or
-      consider opening a GitHub issue first to gauge interest.
+      PR #5 was closed 2026-05-02 after no response and its head branch
+      `upstream-prep` deleted. Underlying commits are still in `main`'s
+      history and the cherry-pick recipe lives in `tasks/upstream.md`.
+      Rather than another cold-open PR, watch
+      <https://github.com/ogdenpm/hitech/commits/main> for new activity
+      (last commit before our PR was June 2025), or consider opening a
+      GitHub issue first to gauge interest.
 
 ## Done — 2026-05-02
 
