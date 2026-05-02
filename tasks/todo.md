@@ -5,6 +5,21 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
+- [ ] **Investigate CI smoke-test failure.** GitHub Actions smoke step
+      (`.github/workflows/build.yml` -> "End-to-end smoke test") is
+      currently `continue-on-error: true`. On `ubuntu-latest` the chain
+      trips a glibc stack canary somewhere between cgen and zas
+      (`*** stack smashing detected ***: terminated`); on
+      `macos-latest` (case-sensitive APFS) it fails earlier with
+      `hello.obj: hello.obj: Can't open`. Same test passes locally on
+      the maintainer's macOS Apple clang and via `Scripts/check.sh`. Both
+      symptoms suggest a pre-existing latent bug in the host tools
+      that's masked by case-insensitive APFS + Apple clang's defaults.
+      Repro: install the workflow's exact toolchain locally
+      (Ubuntu 22.04 gcc, GitHub macos-latest's APFS layout) or attach
+      `keepi`/`keepp1`/`keepas` flags in the workflow to see which step
+      crashes.
+
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
       change a contributed binary archive — escalate to `markogden/hitech`
