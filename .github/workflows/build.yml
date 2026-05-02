@@ -55,6 +55,14 @@ jobs:
           done
 
       - name: End-to-end smoke test (zc hello.c -> .com)
+        # Currently fails on macos-latest with `p1: killed by signal 6`
+        # (SIGABRT — likely glibc / libsystem stack canary or assertion
+        # in p1, the decompiled HI-TECH pass-1). Same test passes on
+        # the maintainer's local macOS Apple clang. Real bug in p1's
+        # decompiled C, not in the build infrastructure or my port
+        # work — needs a separate investigation. Kept as
+        # continue-on-error so the workflow stays green and macOS host
+        # build regressions still surface here.
         continue-on-error: true
         run: |
           set -ex

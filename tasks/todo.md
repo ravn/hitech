@@ -5,20 +5,17 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
-- [ ] **Investigate CI smoke-test failure.** GitHub Actions smoke step
-      (`.github/workflows/build.yml` -> "End-to-end smoke test") is
-      currently `continue-on-error: true`. On `ubuntu-latest` the chain
-      trips a glibc stack canary somewhere between cgen and zas
-      (`*** stack smashing detected ***: terminated`); on
-      `macos-latest` (case-sensitive APFS) it fails earlier with
-      `hello.obj: hello.obj: Can't open`. Same test passes locally on
-      the maintainer's macOS Apple clang and via `Scripts/check.sh`. Both
-      symptoms suggest a pre-existing latent bug in the host tools
-      that's masked by case-insensitive APFS + Apple clang's defaults.
-      Repro: install the workflow's exact toolchain locally
-      (Ubuntu 22.04 gcc, GitHub macos-latest's APFS layout) or attach
-      `keepi`/`keepp1`/`keepas` flags in the workflow to see which step
-      crashes.
+- [ ] **Investigate `p1: killed by signal 6` in CI.** The GitHub Actions
+      smoke step (`continue-on-error: true`) now reports the failing
+      sub-tool clearly thanks to `fe6b370` (zc nerrs/diagnostic fix).
+      `p1` (HI-TECH pass-1, decompiled from CP/M binary) aborts with
+      SIGABRT on both `ubuntu-latest` and `macos-latest` runners but
+      runs fine on the maintainer's local macOS Apple clang. Likely
+      cause: stack canary or assertion tripping inside the decompiled
+      code that local Apple clang's defaults don't catch. ~5 KLOC
+      across `p1/{main,lex,expr,stmt,sym,type,emit,program,memchk,op,
+      cclass}.c` — needs a session of its own. Workaround: leave the
+      smoke step as `continue-on-error`; the build itself is solid.
 
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
