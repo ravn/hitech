@@ -46,8 +46,8 @@ else
 fi
 
 # ---------------------------------------------------------------- 2. runtime tree
-hdr_count=$(find runtime/include80 -maxdepth 1 -name '*.H' 2>/dev/null | wc -l | tr -d ' ')
-lib_count=$(find runtime/lib80 -maxdepth 1 \( -name '*.LIB' -o -name '*.OBJ' \) 2>/dev/null | wc -l | tr -d ' ')
+hdr_count=$(find runtime/include80 -maxdepth 1 -name '*.h' 2>/dev/null | wc -l | tr -d ' ')
+lib_count=$(find runtime/lib80 -maxdepth 1 \( -name '*.lib' -o -name '*.obj' \) 2>/dev/null | wc -l | tr -d ' ')
 if [ "$hdr_count" = "22" ] && [ "$lib_count" = "7" ]; then
     step "$PASS" "runtime tree — 22 headers + 7 libs/objs in runtime/"
 else

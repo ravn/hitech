@@ -1,0 +1,6 @@
+# The repo-root .gitignore has '*.lib' and '*.obj' patterns to keep
+# Visual Studio build output out of the tree. The vendored Z80 runtime
+# under lib80/ is exempt — these are tracked binaries, not build output.
+
+!lib80/*.lib
+!lib80/*.obj

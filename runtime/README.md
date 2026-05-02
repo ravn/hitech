@@ -45,24 +45,36 @@ runtime/
 └── lib80/              runtime libraries + startup objects (linker inputs)
 ```
 
+### Filename case — deviation from upstream
+
+The agn453 distribution preserves the **uppercase** CP/M filenames (`STDIO.H`,
+`LIBC.LIB`, `NRTCPM.OBJ`, …). This fork stores them **lowercase**
+(`stdio.h`, `libc.lib`, `nrtcpm.obj`) so the toolchain works on
+case-sensitive filesystems (Linux ext4, GitHub Actions macos-latest's
+case-sensitive APFS volumes). `zc/zc.c:78-87` and the include search code
+both reference these filenames in lowercase form, and case-insensitive
+filesystems happily resolved the mismatch — but case-sensitive filesystems
+do not. File contents are byte-identical to upstream; only the filename
+case has been changed.
+
 ### `include80/` — standard headers (22 files)
 
-`ASSERT.H`, `CONIO.H`, `CPM.H`, `CTYPE.H`, `EXEC.H`, `FLOAT.H`, `HITECH.H`,
-`LIMITS.H`, `MATH.H`, `OVERLAY.H`, `SETJMP.H`, `SIGNAL.H`, `STAT.H`,
-`STDARG.H`, `STDDEF.H`, `STDINT.H`, `STDIO.H`, `STDLIB.H`, `STRING.H`,
-`SYS.H`, `TIME.H`, `UNIXIO.H`.
+`assert.h`, `conio.h`, `cpm.h`, `ctype.h`, `exec.h`, `float.h`, `hitech.h`,
+`limits.h`, `math.h`, `overlay.h`, `setjmp.h`, `signal.h`, `stat.h`,
+`stdarg.h`, `stddef.h`, `stdint.h`, `stdio.h`, `stdlib.h`, `string.h`,
+`sys.h`, `time.h`, `unixio.h`.
 
 ### `lib80/` — libraries and startup objects
 
 | File         | Purpose                                                |
 |--------------|--------------------------------------------------------|
-| `LIBC.LIB`   | Standard C runtime (stdio, string, memory, …)          |
-| `LIBF.LIB`   | Floating-point routines (used when `-LF` is passed)    |
-| `LIBOVR.LIB` | Overlay support (`#include <overlay.h>`)               |
-| `CRTCPM.OBJ` | CP/M startup with command-line argument parsing (`-R`) |
-| `DRTCPM.OBJ` | Debug startup variant                                  |
-| `NRTCPM.OBJ` | Default ("no-getargs") CP/M startup                    |
-| `RRTCPM.OBJ` | Reentrant runtime startup variant                      |
+| `libc.lib`   | Standard C runtime (stdio, string, memory, …)          |
+| `libf.lib`   | Floating-point routines (used when `-LF` is passed)    |
+| `libovr.lib` | Overlay support (`#include <overlay.h>`)               |
+| `crtcpm.obj` | CP/M startup with command-line argument parsing (`-R`) |
+| `drtcpm.obj` | Debug startup variant                                  |
+| `nrtcpm.obj` | Default ("no-getargs") CP/M startup                    |
+| `rrtcpm.obj` | Reentrant runtime startup variant                      |
 
 Files **not** copied from upstream `dist/`:
 
@@ -114,15 +126,14 @@ The snapshot is intentionally pinned. To refresh:
 
 ```bash
 git clone https://github.com/agn453/HI-TECH-Z80-C /tmp/htc-dist
-cp -p /tmp/htc-dist/dist/*.H        runtime/include80/
-cp -p /tmp/htc-dist/dist/LIBC.LIB \
-      /tmp/htc-dist/dist/LIBF.LIB \
-      /tmp/htc-dist/dist/LIBOVR.LIB \
-      /tmp/htc-dist/dist/CRTCPM.OBJ \
-      /tmp/htc-dist/dist/DRTCPM.OBJ \
-      /tmp/htc-dist/dist/NRTCPM.OBJ \
-      /tmp/htc-dist/dist/RRTCPM.OBJ \
-                                    runtime/lib80/
+for src in /tmp/htc-dist/dist/*.H; do
+    base=$(basename "$src" | tr '[:upper:]' '[:lower:]')
+    cp -p "$src" "runtime/include80/$base"
+done
+for src in /tmp/htc-dist/dist/{LIBC.LIB,LIBF.LIB,LIBOVR.LIB,CRTCPM.OBJ,DRTCPM.OBJ,NRTCPM.OBJ,RRTCPM.OBJ}; do
+    base=$(basename "$src" | tr '[:upper:]' '[:lower:]')
+    cp -p "$src" "runtime/lib80/$base"
+done
 cp -p /tmp/htc-dist/LICENSE         runtime/LICENSE.HITECH
 ```
 

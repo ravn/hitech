@@ -2,8 +2,8 @@
 # Override the repo-root rules for files in this subtree.
 
 # Libraries and startup objects must be byte-identical to upstream.
-lib80/*.LIB binary
-lib80/*.OBJ binary
+lib80/*.lib binary
+lib80/*.obj binary
 
 # Headers are plain ASCII; let git normalize line endings on commit.
-include80/*.H text
+include80/*.h text
