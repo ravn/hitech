@@ -8,16 +8,10 @@ As of 2026-05-02, our `main` is **10 commits ahead** of `upstream/main` and
 
 ## Status
 
-PR submitted with explicit user authorisation on 2026-05-02:
-
-> **<https://github.com/ogdenpm/hitech/pull/5>** — open, awaiting maintainer review.
-> Title: "macOS portability: replace negative platform gates with #ifdef CPM"
-> 3 files changed, +47/-2.
-
-Branch `upstream-prep` is pushed to `origin` (ravn/hitech) and serves as the
-PR head. Tracking remains unset so a stray `git push` from the working tree
-cannot accidentally target upstream. Three clean commits on top of
-`upstream/main`:
+PR was opened 2026-05-02, then **closed by us later the same day** with no
+maintainer response (no comments, no review). The branch `upstream-prep`
+remains on `origin` and locally with the three clean commits intact, ready
+to re-submit when there's evidence the maintainer is actively merging:
 
 ```
 1e027ca cgen/nikitin: document LIBRARY.HUF transcription bugs
@@ -25,9 +19,18 @@ d606e97 cpp: replace defined(unix) || defined(_WIN32) guard with #ifndef CPM
 b386e50 enhuff: replace !unix && !_WIN32 guard with #if CPM
 ```
 
-If the maintainer requests rebases or splits, do that on `upstream-prep` and
-push again. Other open items (runtime/ vendoring, AGENTS.md/CLAUDE.md,
-re-Huffman'ing LIBRARY.HUF) remain not-yet-discussed.
+Reference: closed PR at <https://github.com/ogdenpm/hitech/pull/5>.
+
+Other host-tool fixes that landed in `main` after PR #5 was opened and
+were never submitted upstream (would belong in a hypothetical PR #6 if we
+ever re-engage):
+
+- `link/main.c` + `optim/optim.c` — case-sensitive `#include "showVersion.h"`
+  fix (was lowercase, broke on Linux ext4).
+- `zc/zc.c` — POSIX `doexec` now increments `nerrs` and reports the failing
+  sub-tool's exit code or terminating signal.
+- `runtime/` lowercase rename of all 29 vendored files to match `zc.c`'s
+  hardcoded references (only matters on case-sensitive filesystems).
 
 ## Upstream-quality vs local-only
 

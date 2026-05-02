@@ -24,14 +24,14 @@ note next to each completed item describing how it was verified.
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
 
-- [ ] **Track ogdenpm/hitech#5 review.** Three-commit PR
-      (enhuff + cpp.c:1895 + KNOWN_BUGS.md) opened 2026-05-02 with
-      explicit user authorisation. Watch for maintainer response;
-      rebase / split / re-message as requested. If merged, drop this
-      entry and close the loop in `tasks/upstream.md`. Other potential
-      upstream items (`runtime/` vendoring, AGENTS.md/CLAUDE.md,
-      re-Huffman'ing LIBRARY.HUF) were deliberately held back from
-      PR #5 — discuss with the maintainer separately if interest is shown.
+- [ ] **(Dormant) Re-engage upstream when there's a signal Mark is active.**
+      PR #5 (closed 2026-05-02 after no response) and the additional
+      host-tool fixes that landed since are documented in
+      `tasks/upstream.md`. Branch `upstream-prep` is preserved with the
+      original 3 clean commits, ready to re-submit. Rather than another
+      cold-open PR, watch <https://github.com/ogdenpm/hitech/commits/main>
+      for new activity (last commit before our PR was June 2025), or
+      consider opening a GitHub issue first to gauge interest.
 
 ## Done — 2026-05-02
 
