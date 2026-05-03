@@ -5,6 +5,16 @@ note next to each completed item describing how it was verified.
 
 ## In progress / pending
 
+- [ ] **Pin the RunCPM upstream commit in `runcpm/Dockerfile`.** Right
+      now the Dockerfile clones `MockbaTheBorg/RunCPM` at `--depth=1`
+      from the moving `main` branch and extracts upstream's `A0.ZIP`
+      master disk. If upstream renames `A0.ZIP`, changes the layout,
+      or breaks API compatibility with the python wrapper's stdout
+      heuristics, the next image rebuild will fail (or — worse —
+      pass and produce subtly wrong behaviour). Replace the clone
+      with a checkout of a specific tag or commit SHA, and bump
+      deliberately. Low priority; the upstream is fairly stable.
+
 - [ ] **(Optional, upstream) Re-Huffman `LIBRARY.HUF` with fixes baked in.**
       Bugs documented in `cgen/nikitin/KNOWN_BUGS.md`. Re-Huffmanning would
       change a contributed binary archive — escalate to `markogden/hitech`
@@ -30,6 +40,50 @@ note next to each completed item describing how it was verified.
       (last commit before our PRs was June 2025).
 
 ## Done — 2026-05-03
+
+- [x] **CI test job runs the full integration suite via published images.**
+      `.github/workflows/container.yml` `test` job no longer hand-rolls
+      a single hello-world; it checks out the repo, pulls the
+      just-published `:sha-<short>` hitech image and `:runcpm-latest`,
+      and shells out to `make -C tests check` with `ZC=` and
+      `RUNCPM_IMG=` overrides pointing at the docker images.
+      `tests/Makefile` gained a `ZC ?= zc` parameter so the same
+      Makefile serves both local development (native `zc`) and CI
+      (docker-wrapped `zc` in the published image). Six tests run in
+      ~4s on `ubuntu-24.04-arm`.
+
+- [x] **RunCPM exits cleanly via `EXIT.COM` instead of SIGALRM.**
+      `runcpm/Dockerfile` now extracts upstream's `A0.ZIP` master disk
+      so `EXIT.COM` is on drive A:. `runcpm/runcpm-run` rewritten in
+      Python: spawns RunCPM, watches stdout, counts `RunCPM Version`
+      banners (the line-terminated marker for each CCP iteration),
+      and sends `EXIT` after the second one — i.e. as soon as the
+      user's program returns to the CCP. RunCPM halts cleanly,
+      wrapper exits 0. A 30s `threading.Timer` watchdog catches
+      runaway programs but never fires in normal operation.
+      Integration suite: ~60s → ~1.7s. Single `docker run … hello.com`:
+      ~10s → ~0.2s. Why `RunCPM Version` and not the `A0>` prompt:
+      RunCPM emits the prompt without a trailing newline, so
+      line-oriented scanners never see it.
+
+- [x] **Integration test suite under `tests/`.** Six small `.c` programs
+      compiled by the local `zc` and executed inside the runcpm image,
+      each diffed against a committed `.expected` file:
+      `hello`, `prfmt` (printf format specifiers — caught HI-TECH's
+      uppercase `%x`), `strops` (`string.h`), `arith` (int arithmetic /
+      cgen / optim), `pair` (multi-source linking), `badsyn` (negative
+      compile-failure test). Top-level `Makefile` exposes
+      `make integration-test`; `tests/lib/run-test.sh` is the
+      per-test runner; `tests/lib/extract-output.sh` strips the
+      RunCPM banner / prompt noise. `tests/.gitignore` keeps generated
+      `.com / .raw / .actual / .obj` out of the index.
+
+- [x] **PR #6 opened against `ogdenpm/hitech` for the cgen fix.** Single
+      one-line commit (`char cmp` → `int cmp` in `sub_1B2`) on a
+      cherry-pick branch from `upstream/main`. User-introduced;
+      authorship clearly attributed to Claude in the body.
+      <https://github.com/ogdenpm/hitech/pull/6>. Follow-up reminder
+      dated 2026-05-10 in the pending list above.
 
 - [x] **Fixed the Linux/glibc cgen failure.** Root cause was
       `cgen/cgen.c` `sub_1B2` storing `strcmp`'s result in a
