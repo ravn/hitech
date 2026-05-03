@@ -20,6 +20,12 @@ RUNTIME    := $(ROOT)/runtime
 RUNCPM_IMG ?= ghcr.io/ravn/hitech:runcpm-latest
 export RUNCPM_IMG
 
+# How to invoke zc. Default uses the locally built host tool plus the
+# vendored runtime tree. CI overrides with a docker-run pointing at the
+# published hitech image so the test exercises the image, not the
+# runner's gcc-built copy.
+ZC ?= zc
+
 export PATH      := $(INSTALL):$(PATH)
 export INCDIR80  := $(RUNTIME)/include80
 export LIBDIR80  := $(RUNTIME)/lib80
@@ -46,11 +52,11 @@ clean:
 
 # Single-file default.
 %.com: %.c
-	@zc $< > /dev/null 2>&1 || { echo "compile failed for $<"; zc $< ; false; }
+	@$(ZC) $< > /dev/null 2>&1 || { echo "compile failed for $<"; $(ZC) $< ; false; }
 
 # pair links two source files.
 pair.com: pair.c pairlib.c
-	@zc $^ -opair.com > /dev/null 2>&1 || { echo "compile failed for $^"; zc $^ -opair.com ; false; }
+	@$(ZC) $^ -opair.com > /dev/null 2>&1 || { echo "compile failed for $^"; $(ZC) $^ -opair.com ; false; }
 
 # --- per-test rules --------------------------------------------------------
 
@@ -62,7 +68,7 @@ $(foreach t,$(RUNTIME_TESTS),$(eval $(call runtime_rule,$(t))))
 
 # Compile-failure test: zc must exit non-zero on this input.
 run-badsyn: badsyn.c
-	@if zc badsyn.c -obadsyn.com > /dev/null 2>&1; then \
+	@if $(ZC) badsyn.c -obadsyn.com > /dev/null 2>&1; then \
 	    printf '\033[31mFAIL\033[0m badsyn (compile unexpectedly succeeded)\n'; \
 	    rm -f badsyn.com; exit 1; \
 	else \

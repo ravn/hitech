@@ -56,18 +56,22 @@ jobs:
           cache-to: type=gha,mode=max
 
   test:
-    # Pull the just-published image, compile a hello.c with it, and
-    # run the resulting .com under RunCPM to confirm end-to-end the
-    # toolchain inside the image is usable. As of 2026-05-02 this job
-    # FAILS on linux/arm64+glibc (cgen rejects p1's intermediate with
-    # 'Bad int. code'); see tasks/todo.md. Job will go green
-    # automatically once the underlying decompiled-tool bug is fixed.
+    # Pulls the just-published hitech image and the runcpm image, then
+    # runs the full integration suite from tests/ — six tests covering
+    # the printf format spec, string.h, integer arithmetic, multi-source
+    # linking, and a negative compile-failure test. Each test compiles
+    # via `docker run hitech zc <file>` and executes via
+    # `docker run runcpm <com>`, so this job exercises the published
+    # images, not the runner's gcc-built binaries.
     needs: image
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
       packages: read
     steps:
+      - name: Checkout (need tests/ sources and Makefile)
+        uses: actions/checkout@v6
+
       - name: Log in to GHCR (read)
         uses: docker/login-action@v4
         with:
@@ -75,46 +79,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute image ref
-        id: ref
+      - name: Compute image refs
+        id: refs
         run: |
           repo_lc=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
           short=${GITHUB_SHA:0:7}
-          echo "image=ghcr.io/$repo_lc:sha-$short" >> "$GITHUB_OUTPUT"
+          echo "hitech=ghcr.io/$repo_lc:sha-$short" >> "$GITHUB_OUTPUT"
+          echo "runcpm=ghcr.io/$repo_lc:runcpm-latest" >> "$GITHUB_OUTPUT"
 
-      - name: Pull image
-        run: docker pull ${{ steps.ref.outputs.image }}
-
-      - name: Compile hello.c via image
+      - name: Pull both images
         run: |
-          set -ex
-          mkdir -p test
-          cat > test/hello.c <<'EOF'
-          #include <stdio.h>
-          int main(void) { printf("hello, ci!\n"); return 0; }
-          EOF
-          docker run --rm -v "$PWD/test:/work" \
-              ${{ steps.ref.outputs.image }} zc hello.c
-          test -f test/hello.com
-          ls -la test/hello.com
-          grep -aq 'Compiled with Hi-Tech C' test/hello.com
-          echo "compile OK; .com size: $(wc -c < test/hello.com) bytes"
+          docker pull ${{ steps.refs.outputs.hitech }}
+          docker pull ${{ steps.refs.outputs.runcpm }}
 
-      - name: Pull RunCPM image
+      - name: Run integration suite via published images
+        # The tests/Makefile takes ZC and RUNCPM_IMG as overrides; here
+        # we point ZC at a docker-run wrapper for the SHA-tagged hitech
+        # image and RUNCPM_IMG at the runcpm tag.
+        working-directory: tests
         run: |
-          repo_lc=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          docker pull ghcr.io/$repo_lc:runcpm-latest
-
-      - name: Run hello.com under RunCPM image
-        run: |
-          set -e
-          repo_lc=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          out=$(docker run --rm -v "$PWD/test:/work" \
-              ghcr.io/$repo_lc:runcpm-latest /work/hello.com 2>&1)
-          echo "--- RunCPM output ---"
-          printf '%s\n' "$out"
-          if ! printf '%s' "$out" | grep -q 'hello, ci!'; then
-              echo "FAIL: expected 'hello, ci!' in RunCPM output"
-              exit 1
-          fi
-          echo "RunCPM PASS"
+          make check \
+              ZC="docker run --rm -v $PWD:/work -w /work --entrypoint /opt/hitech/bin/zc ${{ steps.refs.outputs.hitech }}" \
+              RUNCPM_IMG=${{ steps.refs.outputs.runcpm }}
