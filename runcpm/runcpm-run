@@ -1,36 +1,97 @@
-#!/bin/sh
-# runcpm-run <path-to-com-file>
-#
-# Thin wrapper around RunCPM. Copies the supplied .com file onto
-# drive A:, runs it via the internal CCP, and exits when the
-# program finishes.
-#
-# A 10-second alarm watchdog (perl) prevents the container from
-# hanging forever if the program loops or RunCPM gets confused.
+#!/usr/bin/env python3
+"""runcpm-run <path-to-com-file>
 
-set -e
+Thin wrapper around RunCPM. Copies the supplied .com onto drive A:,
+sends its name to the CCP, watches the emulator's output until the
+program finishes (second A0> prompt), then sends EXIT.COM (which
+calls the RunCPM-specific BDOS extension that halts the emulator).
+RunCPM exits 0 cleanly.
 
-com=$1
-if [ -z "$com" ] || [ ! -f "$com" ]; then
-    echo "usage: runcpm-run <path-to-com-file>" >&2
-    echo "(received: '$com')" >&2
-    exit 64
-fi
+Watching the output avoids timing assumptions — works whether the
+program runs in 1 ms or 5 s. A 30 s overall watchdog still catches
+runaway programs that never return to the CCP.
+"""
 
-# CP/M filenames are uppercase, max 8 chars before the extension.
-base=$(basename "$com" .com | tr '[:lower:]' '[:upper:]')
-base=$(basename "$base" .COM)
-if [ -z "$base" ]; then
-    echo "runcpm-run: empty basename for $com" >&2
-    exit 65
-fi
+import os
+import shutil
+import subprocess
+import sys
+import threading
 
-cp "$com" "/opt/runcpm/A/0/$base.COM"
+WATCHDOG_SECONDS = 30
 
-cd /opt/runcpm
-# RunCPM doesn't exit on stdin EOF and we don't bake EXIT.COM
-# into the disk, so the alarm watchdog is what stops the process.
-# That makes the exit code SIGALRM (142) on every successful run;
-# swallow it so callers see exit 0 and rely on output inspection
-# to determine success/failure.
-printf '%s\r\n' "$base" | perl -e 'alarm 10; exec @ARGV' ./RunCPM 2>&1 || true
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"usage: {sys.argv[0]} <path-to-com-file>", file=sys.stderr)
+        sys.exit(64)
+
+    com = sys.argv[1]
+    if not os.path.isfile(com):
+        print(f"no such file: {com}", file=sys.stderr)
+        sys.exit(64)
+
+    # CP/M filenames are uppercase 8.3.
+    base = os.path.basename(com).rsplit(".", 1)[0].upper()[:8]
+    if not base:
+        print(f"runcpm-run: empty basename for {com}", file=sys.stderr)
+        sys.exit(65)
+
+    shutil.copy(com, f"/opt/runcpm/A/0/{base}.COM")
+
+    os.chdir("/opt/runcpm")
+    proc = subprocess.Popen(
+        ["./RunCPM"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=0,
+    )
+
+    # Hard watchdog so a hung emulator can't pin the container.
+    timer = threading.Timer(WATCHDOG_SECONDS, proc.kill)
+    timer.start()
+
+    try:
+        # Send the program name, byte for byte, then watch.
+        proc.stdin.write(f"{base}\r\n".encode("ascii"))
+        proc.stdin.flush()
+
+        # We send EXIT after seeing the *second* "RunCPM Version" banner
+        # — it appears once at boot and again every time CCP regains
+        # control after a transient program ends. The "A0>" prompt
+        # itself is no good as a sentinel because RunCPM doesn't emit
+        # a newline after it, so a line-oriented scanner never sees it.
+        ccp_starts = 0
+        sent_exit = False
+        line = bytearray()
+
+        while True:
+            ch = proc.stdout.read(1)
+            if not ch:
+                break
+            sys.stdout.buffer.write(ch)
+            sys.stdout.buffer.flush()
+
+            if ch == b"\n":
+                line_str = line.decode("ascii", errors="replace").rstrip("\r")
+                line.clear()
+                if "RunCPM Version" in line_str:
+                    ccp_starts += 1
+                    if ccp_starts >= 2 and not sent_exit:
+                        proc.stdin.write(b"EXIT\r\n")
+                        proc.stdin.flush()
+                        proc.stdin.close()
+                        sent_exit = True
+            else:
+                line.append(ch[0])
+
+        proc.wait()
+    finally:
+        timer.cancel()
+
+    sys.exit(proc.returncode if proc.returncode is not None else 1)
+
+
+if __name__ == "__main__":
+    main()
