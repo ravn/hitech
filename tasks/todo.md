@@ -12,14 +12,18 @@ note next to each completed item describing how it was verified.
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
 
-- [ ] **(Dormant) Re-engage upstream when there's a signal Mark is active.**
-      PR #5 was closed 2026-05-02 after no response and its head branch
-      `upstream-prep` deleted. Underlying commits are still in `main`'s
-      history and the cherry-pick recipe lives in `tasks/upstream.md`.
-      Rather than another cold-open PR, watch
+- [ ] **Track ogdenpm/hitech#6 review.** Single-commit PR for the
+      `cgen` `int cmp` unsigned-char fix, opened 2026-05-03 with
+      explicit per-action user authorisation. User-introduced; AI
+      authorship clearly stated in the body. Watch for maintainer
+      response. <https://github.com/ogdenpm/hitech/pull/6>
+
+- [ ] **(Dormant) Re-engage upstream further when there's a signal Mark is active.**
+      Other accumulated host-tool fixes (showVersion case, zc nerrs,
+      runtime rename, plus the older PR-#5 contents) catalogued in
+      `tasks/upstream.md`. Rather than another cold-open PR, watch
       <https://github.com/ogdenpm/hitech/commits/main> for new activity
-      (last commit before our PR was June 2025), or consider opening a
-      GitHub issue first to gauge interest.
+      (last commit before our PRs was June 2025).
 
 ## Done — 2026-05-03
 
