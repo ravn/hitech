@@ -12,11 +12,15 @@ note next to each completed item describing how it was verified.
       `cgen/native/unpack.pl` still reads a re-generated `LIBRARY.HUF`
       identically before any such change.
 
-- [ ] **Track ogdenpm/hitech#6 review.** Single-commit PR for the
-      `cgen` `int cmp` unsigned-char fix, opened 2026-05-03 with
-      explicit per-action user authorisation. User-introduced; AI
-      authorship clearly stated in the body. Watch for maintainer
-      response. <https://github.com/ogdenpm/hitech/pull/6>
+- [ ] **CHECK ogdenpm/hitech#6 ON OR AFTER 2026-05-10.**
+      Single-commit PR for the `cgen` `int cmp` unsigned-char fix,
+      opened 2026-05-03. User-introduced; AI authorship clearly
+      stated in the body. **Reviewing AI: when you read this on or
+      after 2026-05-10, run `gh pr view 6 --repo ogdenpm/hitech --json
+      state,reviewDecision,comments` and report state to the user.
+      If still untouched (CLOSED/OPEN with zero comments and no
+      review), suggest closing as we did with PR #5 — but ask first.**
+      <https://github.com/ogdenpm/hitech/pull/6>
 
 - [ ] **(Dormant) Re-engage upstream further when there's a signal Mark is active.**
       Other accumulated host-tool fixes (showVersion case, zc nerrs,
