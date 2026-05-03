@@ -85,6 +85,18 @@ A repository-wide smoke test for "am I good to start?" sessions. Run it from any
 
 Each step prints PASS / FAIL / SKIP. Exits non-zero on any FAIL. Designed to be run when you sit back down at the project, not on every commit.
 
+### Integration test (`make integration-test`)
+
+A more thorough cross-check than `Scripts/check.sh`. Top-level `Makefile` builds the host tools, then `tests/Makefile` compiles six small `.c` programs with the local `zc`, runs each inside `ghcr.io/ravn/hitech:runcpm-latest`, and diffs the captured output against committed `.expected` files. One test (`badsyn`) inverts the contract: `zc` is required to *fail* on malformed C.
+
+```bash
+make integration-test       # full: build + run all tests
+make -C tests check         # tests only
+make -C tests clean
+```
+
+Tests cover the full pipeline (`hello`), printf format specifiers (`prfmt`), `string.h` (`strops`), integer arithmetic (`arith`), multi-source linking (`pair` = `pair.c` + `pairlib.c`), and the compile-failure path (`badsyn`). Add a new test by dropping `<name>.c` and `<name>.expected` into `tests/` and adding `<name>` to `RUNTIME_TESTS` in `tests/Makefile`. Requires Docker locally.
+
 ## Versioning
 
 `Scripts/getVersion.pl` reads git history for the tool's directory and writes `_version.h` containing `#define GIT_VERSION "yyyy.mm.dd.nn"`. Invoked from `Linux/hi.mk`:

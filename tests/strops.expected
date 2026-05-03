@@ -1,0 +1,5 @@
+len=6
+str=abcdef
+eq=0
+less=1
+greater=1
