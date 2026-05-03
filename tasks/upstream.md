@@ -8,32 +8,39 @@ As of 2026-05-02, our `main` is **10 commits ahead** of `upstream/main` and
 
 ## Status
 
-PR was opened 2026-05-02, then **closed by us later the same day** with no
-maintainer response. The `upstream-prep` branch was deleted from both
-`origin` and the local repo. The PR record at
-<https://github.com/ogdenpm/hitech/pull/5> shows as CLOSED with the head
-branch deleted; only the commit metadata remains.
+**PR #5** (2026-05-02) — original 3-commit PR (enhuff + cpp.c:1895 +
+LIBRARY.HUF KNOWN_BUGS.md). Closed same day with no maintainer response;
+head branch deleted. <https://github.com/ogdenpm/hitech/pull/5>
 
-To re-create the prep branch when needed, the underlying changes are
-preserved in `main`'s history. Use the recipe in the "Mechanical plan"
-section below — substitute these commit IDs for the ones cherry-picked:
+**PR #6** (2026-05-03) — focused single-commit PR for the cgen
+`int cmp` fix (the unsigned-char binary-search bug found while
+investigating CI failures). User-introduced; clearly attributes
+authorship to Claude. Currently OPEN, awaiting review.
+<https://github.com/ogdenpm/hitech/pull/6>. Branch
+`upstream-prep` is back on origin (and local) at commit `4b1b60c`.
+
+Underlying commits in our `main` are preserved as their original SHAs
+should we want to re-create or re-submit any of the others:
 
 ```
-2c75272 / earlier: enhuff/enhuff.c #if CPM     (originally 808eb09)
-749bc9a:           cpp/cpp.c #ifndef CPM
-1b46df9:           cgen/nikitin/KNOWN_BUGS.md
+0dca1d5: cgen/cgen.c int cmp           (currently the head of PR #6 = 4b1b60c)
+1828731: link/main.c + optim/optim.c showVersion.h case fix
+fe6b370: zc/zc.c POSIX nerrs + signal/exit diagnostics
+749bc9a: cpp/cpp.c #ifndef CPM
+1b46df9: cgen/nikitin/KNOWN_BUGS.md
+808eb09: enhuff/enhuff.c #if CPM
+a1bfed2: runtime/ lowercase rename       (fork-only — unlikely upstream)
 ```
 
-Other host-tool fixes that landed in `main` after PR #5 was opened and
-were never submitted upstream (would belong in a hypothetical PR #6 if we
-ever re-engage):
+Other host-tool fixes that landed in `main` after PR #5 closed and have
+not been submitted upstream:
 
 - `link/main.c` + `optim/optim.c` — case-sensitive `#include "showVersion.h"`
-  fix (was lowercase, broke on Linux ext4).
-- `zc/zc.c` — POSIX `doexec` now increments `nerrs` and reports the failing
-  sub-tool's exit code or terminating signal.
-- `runtime/` lowercase rename of all 29 vendored files to match `zc.c`'s
-  hardcoded references (only matters on case-sensitive filesystems).
+  fix.
+- `zc/zc.c` — POSIX `doexec` now increments `nerrs` and reports the
+  failing sub-tool's exit code or terminating signal.
+- `runtime/` lowercase rename — fork-local; deviates from agn453's
+  uppercase convention.
 
 ## Upstream-quality vs local-only
 
