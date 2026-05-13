@@ -391,9 +391,9 @@ uint8_t parseNumber(int16_t ch) {
  **************************************************/
 uint8_t parseName(int8_t ch) {
     int16_t len;
-    uint8_t mid;
-    uint8_t lo;
-    uint8_t hi;
+    int mid;
+    int lo;
+    int hi;
     int16_t cmp;
     register char *s = nameBuf;
 

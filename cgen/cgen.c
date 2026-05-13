@@ -1025,7 +1025,7 @@ int sub_13D(int a, int b) {
  * Token search		(Binary search algorithm is used)
  *********************************************************/
 char sub_1B2(register char *target) {
-    uint8_t hi, lo, mid;
+    int hi, lo, mid;
     int cmp;
 
     /* clang-format off */
