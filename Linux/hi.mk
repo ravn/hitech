@@ -4,7 +4,7 @@ SRCDIR=$(subst /Linux,,$(realpath .))
 ROOT:=$(realpath ../..)
 INSTALLDIR = $(ROOT)/Linux/Install
 
-CFLAGS = -O3 -Wall -I$(SRCDIR) -I$(ROOT)/hishared
+CFLAGS = -O3 -Wall -fsigned-char -I$(SRCDIR) -I$(ROOT)/hishared
 VPATH = $(SRCDIR):$(ROOT)/hishared
 
 all:  $(TARGET) | $(INSTALLDIR)
