@@ -1186,7 +1186,7 @@ void pr_message(char const *fmt, va_list args) {
  ld a,l             ld (ix-1),a
  **************************************************************************/
 int find_token(register char const *str, operator_t const *p2, int p3) {
-    char cmp;
+    int cmp;
     uint8_t high, low, mid;
 
     tableBase = p2;
